@@ -5,7 +5,9 @@ import numpy as np
 class Maze(gym.Env):
     metadata = {'render.modes': ['human']}
     def __init__(self):
-        pass
+        self.player = None
+        self.maze = None
+
 
 
     def step(self, action):
