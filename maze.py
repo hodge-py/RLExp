@@ -25,21 +25,29 @@ class Maze(gym.Env):
 
 
     def step(self, action):
-        if action == 0:
+        if action == 0: # need to fix when the player goes out of bounds
             self.player_position[0] += 1
-            if self.maze[self.player_position[0]][self.player_position[1]] == 1:
+            if self.player_position[0] >= len(self.maze[0])-1:
+                self.player_position[0] -= 1
+            elif self.maze[self.player_position[0]][self.player_position[1]] == 1:
                 self.player_position[0] -= 1
         elif action == 1:
             self.player_position[1] += 1
-            if self.maze[self.player_position[0]][self.player_position[1]] == 1:
+            if self.player_position[1] >= len(self.maze)-1:
+                self.player_position[1] -= 1
+            elif self.maze[self.player_position[0]][self.player_position[1]] == 1:
                 self.player_position[1] -= 1
         elif action == 2:
             self.player_position[0] -= 1
-            if self.maze[self.player_position[0]][self.player_position[1]] == 1:
+            if self.player_position[0] < 0:
+                self.player_position[0] += 1
+            elif self.maze[self.player_position[0]][self.player_position[1]] == 1:
                 self.player_position[0] += 1
         else:
             self.player_position[1] -= 1
-            if self.maze[self.player_position[0]][self.player_position[1]] == 1:
+            if self.player_position[1] < 0:
+                self.player_position[1] += 1
+            elif self.maze[self.player_position[0]][self.player_position[1]] == 1:
                 self.player_position[1] += 1
 
         #reward structure
@@ -86,7 +94,7 @@ model.learn(total_timesteps=10000, progress_bar=True)
 vec_env = model.get_env()
 obs = vec_env.reset()
 
-while True:
+for i in range(100):
     action, _state = model.predict(obs)
     obs, reward, done, info = vec_env.step(action)
     if done:
