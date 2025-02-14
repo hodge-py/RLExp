@@ -84,7 +84,7 @@ class Maze(gym.Env):
         return self.player_position
 
     def renderAll(self):
-        return self.array_player, self.array_reward
+        return self.array_player, self.array_reward, len(self.maze[0])
 
 env = Maze()
 
