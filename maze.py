@@ -6,7 +6,7 @@ from gymnasium import spaces
 class Maze(gym.Env):
 
     def __init__(self):
-        self.player_position = np.array([0, 0])
+        self.player_position = [0, 0]
         self.maze = np.array([
                     [0, 1, 0, 1, 0, 0, 0, 1],
                     [0, 0, 1, 1, 0, 1, 0, 1],
@@ -20,34 +20,57 @@ class Maze(gym.Env):
         self.array_reward = []
         self.action_space = gym.spaces.Discrete(4)
         self.observation_space = spaces.Box(low=0, high=len(self.maze)-1, shape=(2,))
-
-        self.action_step = {0: [1,0], 1: [0,1], 2: [-1,0], 3: [0,-1]}
+        self.done = False
 
         self.reward = 0
 
 
     def step(self, action):
-        actions = self.action_step[action]
 
-        if actions == 0:
-            seflf\= \
+        if action == 0:
+            self.player_position[0] += 1
+            if self.player_position[0] >= len(self.maze):
+                self.player_position[0] -= 1
+            elif self.maze[self.player_position[0]][self.player_position[1]] == 1:
+                self.player_position[0] -= 1
+        elif action == 1:
+            self.player_position[1] += 1
+            if self.player_position[1] >= len(self.maze[0]):
+                self.player_position[1] -= 1
+            elif self.maze[self.player_position[0]][self.player_position[1]] == 1:
+                self.player_position[1] -= 1
+        elif action == 2:
+            self.player_position[0] -= 1
+            if self.player_position[0] < 0:
+                self.player_position[0] += 1
+            elif self.maze[self.player_position[0]][self.player_position[1]] == 1:
+                self.player_position[0] += 1
+        else:
+            self.player_position[1] -= 1
+            if self.player_position[1] < 0:
+                self.player_position[1] += 1
+            elif self.maze[self.player_position[0]][self.player_position[1]] == 1:
+                self.player_position[1] += 1
+
         #reward structure
         # every move -.1, 1 for reaching the goal
         obs = self._get_obs()
 
         self.current_step += 1
 
+
         if self.maze[self.player_position[0]][self.player_position[1]] == 2:
             reward = 1
             done = True
         else:
-            reward = -.1
+            reward = -.3
             done = False
 
         self.reward = reward
-        info = {}
 
         self.render()
+        info = {}
+        self.done = done
 
         return obs, reward, done, False, info
 
@@ -55,6 +78,7 @@ class Maze(gym.Env):
         self.current_step = 0
         self.player_position = [0, 0]
         self.reward = 0
+        self.done = False
         return self._get_obs(), {}
 
     def render(self):
@@ -62,10 +86,10 @@ class Maze(gym.Env):
         self.array_reward.append(self.reward)
 
     def _get_obs(self):
-        return np.array(self.player_position)
+        return self.player_position
 
     def renderAll(self):
-        return self.array_player, self.array_reward, len(self.maze[0])
+        return self.array_player, self.array_reward
 
 env = Maze()
 
@@ -74,12 +98,10 @@ model.learn(total_timesteps=10000, progress_bar=True)
 
 vec_env = model.get_env()
 obs = vec_env.reset()
-
-while True:
+done = False
+while not done:
     action, _state = model.predict(obs)
     obs, reward, done, info = vec_env.step(action)
-    if done:
-        break
 
 dataOutput = env.renderAll()
 print(dataOutput)
